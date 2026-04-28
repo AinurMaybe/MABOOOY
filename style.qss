@@ -1,0 +1,18 @@
+QWidget {
+    background-color: #070a07;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+}
+
+QPushButton {
+    background-color: #009100;
+    padding: 0.2em 1em;
+    border-radius: 0.2em;
+    max-width: 200px;
+}
+
+#bold {
+    font-weight: 600;
+}
+QMessageBox{min-width: 700px;}
