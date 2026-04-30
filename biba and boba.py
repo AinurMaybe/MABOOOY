@@ -1,4 +1,5 @@
-from random import randint
+from random import *
+import sys
 from PyQt5.QtCore import Qt,QFile,QIODevice,QTextStream,QTimer
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (
@@ -27,7 +28,7 @@ class MyWindow(QWidget):
             self.btns_group.addButton(btn)
 
         self.button = QPushButton(TO_RES)
-        self.button.clicked.connect(self.show)
+        self.button.clicked.connect(self.click)
 
         self.isRight = QLabel('Правильно or Неправильно?')
         self.rightAnswer = QLabel('Правильный ответ:')
@@ -52,6 +53,7 @@ class MyWindow(QWidget):
         self.resGroup = QGroupBox('Results:')
         self.resGroup.setLayout(resLine)
         self.resGroup.hide()
+        self.setQuestion(QS[0])
         
         
         mainLine = QVBoxLayout()
@@ -68,15 +70,30 @@ class MyWindow(QWidget):
         self.button.setText(TO_TEST)
 
     def to_test(self):
+        self.btns_group.setExclusive(False)
+        for btn in self.btns:
+            btn.setChecked(False)
+        self.btns_group.setExclusive(True)
         self.test_group.show()
         self.resGroup.hide()
         self.button.setText(TO_RES)
-    
-    def show(self):
+
+
+    def setQuestion(self,q):
+        shuffle(self.btns)
+        self.btns[0].setText(q[RIGHT])
+        self.btns[1].setText(q[WRONG][0])
+        self.btns[3].setText(q[WRONG][2])
+        self.btns[2].setText(q[WRONG][1])
+        self.text.setText(q[TEXT])
+        self.to_test()
+
+
+    def click(self):
         if self.button.text() == TO_TEST:
             self.to_test()
         else:
-            self.toResult()
+            self.toResult() 
 
     def set_styles(self, ui_filename='style.qss', icon='sberbank-pink.jpg'):
         stream = QFile(ui_filename)
@@ -91,14 +108,9 @@ class MyWindow(QWidget):
         msg.resize(w,h)
         msg.exec_()
 
-    def click(self):
-        if self.btn4.isChecked():
-            self.message('BepHo!','Не верно! ')
-        else:
-            self.message('Нет. но..','Да.')
 
 app = QApplication([])
 app.setWindowIcon(QtGui.QIcon('sberbank-pink.jpg'))
 window = MyWindow('Ета типа кводрот.')
 window.show()
-app.exec_()
+sys.exit(app.exec_())
