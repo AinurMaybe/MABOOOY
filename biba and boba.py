@@ -7,11 +7,13 @@ from PyQt5.QtWidgets import (
     QRadioButton,QHBoxLayout,QMessageBox,QButtonGroup,QGroupBox
 )
 from const import *
+from stats import *
 class MyWindow(QWidget):
-
+    
     def __init__(self,title,w = 400, h =200):
         super().__init__()
         self.setWindowTitle(title)
+        self.stats = Stats()
         self.resize(w,h)
         self.set_styles()
         self.setUi()
@@ -28,7 +30,7 @@ class MyWindow(QWidget):
             self.btns_group.addButton(btn)
 
         self.button = QPushButton(TO_RES)
-        self.button.clicked.connect(self.click)
+        self.button.clicked.connect(self.check)
 
         self.isRight = QLabel('Правильно or Неправильно?')
         self.rightAnswer = QLabel('Правильный ответ:')
@@ -53,7 +55,7 @@ class MyWindow(QWidget):
         self.resGroup = QGroupBox('Results:')
         self.resGroup.setLayout(resLine)
         self.resGroup.hide()
-        self.setQuestion(QS[0])
+        self.setQuestion(self.stats.now)
         
         
         mainLine = QVBoxLayout()
@@ -82,18 +84,45 @@ class MyWindow(QWidget):
     def setQuestion(self,q):
         shuffle(self.btns)
         self.btns[0].setText(q[RIGHT])
+        self.rightAnswer.setText('Правильный ответ: '+q[RIGHT])
         self.btns[1].setText(q[WRONG][0])
         self.btns[3].setText(q[WRONG][2])
         self.btns[2].setText(q[WRONG][1])
         self.text.setText(q[TEXT])
         self.to_test()
 
-
-    def click(self):
-        if self.button.text() == TO_TEST:
-            self.to_test()
+    def check(self):
+        if self.btns[0].isChecked():
+            self.isRight.setText('Ты молодец')
+            self.showResult()
         else:
-            self.toResult() 
+            if self.btns[1].isChecked() or self.btns[2].isChecked() or self.btns[3].isChecked():
+                self.isRight.setText('Неправильно! Болван!')
+                self.showResult()
+    
+    def showResult(self):
+        if self.button.text() == TO_TEST:
+            self.newQuestion()
+        else:
+            self.toResult()
+
+    def newQuestion(self):
+        self.stats.next_question()
+        if self.stats.answered > 0:
+            self.setQuestion(self.stats.now)
+        else:
+            self.showFullScreen()
+            self.message('Конец',f'Ты набрал {self.stats.right} правильных ответов из {self.stats.total}')
+            images = ['zelya.jpg','yoooyooo.jpg']
+            self.image = QtGui.QPixmap('src/'+choice(images))
+            self.image = self.image.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.text.setPixmap(self.image)
+            self.test_group.hide()
+            self.resGroup.hide()
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.close()
+
 
     def set_styles(self, ui_filename='style.qss', icon='sberbank-pink.jpg'):
         stream = QFile(ui_filename)
